@@ -7,681 +7,834 @@
 #include "callbacks.h"
 #include "interface.h"
 #include "support.h"
-#include "capteur.h"
-#include <string.h>
-
-
-//-----------------------------------------------------------------------------------
-
-void
-on_buttonajout_clicked                 (GtkWidget       *objet_graphique,
-                                       gpointer         user_data)
-{
-capteur capteur ;
-GtkWidget *Ajouter  ;
-GtkWidget *gestion_capteur ;
-
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gtk_widget_destroy(gestion_capteur) ;
-Ajouter=lookup_widget(objet_graphique,"Ajouter");
-Ajouter=create_Ajouter();
-
-gtk_widget_show(Ajouter);
-}
-//-----------------------------------------------------------------------
+#include "plantation.h"
+#include "precipitation.h"
 
 
 void
-on_buttoncomfirmer_clicked                (GtkWidget       *objet_graphique,
-                                        gpointer         user_data)
-{
-capteur capteur ;
-GtkWidget *input1,*input2,*input3,*input4,*input5,*input6,*input7;
-GtkWidget *Ajouter ,*e ,*e1 ;
-GtkWidget *gestion_capteur ;
-GtkWidget *wbatreeviewcapteur , *output ;
-Ajouter=lookup_widget(objet_graphique,"Ajouter");
-
-input1=lookup_widget(objet_graphique,"entrynum");
-input2=lookup_widget(objet_graphique,"entrynserie");
-input3=lookup_widget(objet_graphique,"entrymarque");
-e=lookup_widget(objet_graphique,"comboboxtype");
-input5=lookup_widget(objet_graphique,"spinbuttonbi");
-input6=lookup_widget(objet_graphique,"spinbuttonbs");
-e1=lookup_widget(objet_graphique,"comboboxetat");
-
-
-strcpy(capteur.nbre,gtk_entry_get_text(GTK_ENTRY(input1)));
-strcpy(capteur.nserie,gtk_entry_get_text(GTK_ENTRY(input2)));
-strcpy(capteur.marque,gtk_entry_get_text(GTK_ENTRY(input3)));
-strcpy(capteur.type,gtk_combo_box_get_active_text(GTK_COMBO_BOX(e)));
-capteur.bi=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input5));
-capteur.bs=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input6));
-strcpy(capteur.etat,gtk_combo_box_get_active_text(GTK_COMBO_BOX(e1)));
-
-ajouter_capt(capteur);
-/*gtk_widget_destroy(Ajouter) ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gestion_capteur=create_gestion_capteur();
-
-gtk_widget_show(gestion_capteur);
-wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-affiche_capt(wbatreeviewcapteur);*/
-output=lookup_widget(objet_graphique,"label102");
-gtk_label_set_text(GTK_LABEL(output),"ajouté avec succés");
-}
-
-
-//-----------------------------------------------------------
-
-void
-on_wbatreeviewcapteur_row_activated    (GtkTreeView     *treeview,
+on_treeview_row_activated              (GtkTreeView     *treeview,
                                         GtkTreePath     *path,
                                         GtkTreeViewColumn *column,
                                         gpointer         user_data)
 {
-	  
-GtkWidget *gestion_capteur, *supprimer , *wbatreeviewcapteur ;
-GtkTreeIter iter ;
-gchar* entrynum ;
-gchar* entrynserie ;
-gchar* entrymarque ;
-gchar* entrytype ;
-gchar* entrybi ;
-gchar* entrybs ;
-gchar* entryetat ;
-capteur capteur ;
-char fichier[]={"capteur.txt"};
+GtkTreeIter iter;
+gchar* nom;
+gchar* code_plante;
+gchar* jour;
+gchar* mois;
+gchar* annee;
+gchar* etat;
+gchar* stock;
+gchar* type;
+plantation p;
+GtkTreeModel *model= gtk_tree_view_get_model(treeview);
 
-
-GtkTreeModel *model = gtk_tree_view_get_model(treeview);
-
-if (gtk_tree_model_get_iter(model, &iter, path))
+if (gtk_tree_model_get_iter(model, &iter,path))
 {
-	gtk_tree_model_get (GTK_LIST_STORE (model), &iter , 0 , &entrynum ,  1 ,&entrynserie, 2 , &entrymarque , 3 , &entrytype ,4 ,&entryetat, 5 , &entrybi, 6 , &entrybs,   -1);
-	strcpy(capteur.nbre,entrynum);
-	strcpy(capteur.nserie,entrynserie);
-	strcpy(capteur.marque,entrymarque);
-	strcpy(capteur.type,entrytype);
-	strcpy(capteur.etat,entryetat);
-	strcpy(capteur.bi,entrybi);
-	strcpy(capteur.bs,entrybs);
-	
-	wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-	affiche_capt(wbatreeviewcapteur);
-}
+//obtenir les valeurs de la ligne selectionnée
+
+gtk_tree_model_get(GTK_LIST_STORE(model),&iter,0,&nom,1,&code_plante,2,&jour,3,&mois,4,&annee,5,&etat,6,&stock,7,&type,-1);
+
+//copie dans e
+    strcpy(p.nom,nom);
+    strcpy(p.code_plante,code_plante);
+    strcpy(p.code_plante,code_plante);
+    strcpy(p.d.jour,jour);
+    strcpy(p.d.mois,mois);
+    strcpy(p.d.annee,annee);
+    strcpy(p.etat,etat);
+    strcpy(p.stock,stock);
+    strcpy(p.type,type);
+
+
+
+
+//*appel de la fct de suppression
+//*supprimer_plant(code_plant);//
+//màj du treeview
+afficher_plantation(treeview);
+
+
 
 }
-
-
-
-
-//---------------------------------------------------------
-
-
-
-
-
-
-
-//-----------------------------------------------------------------------
-
-
+}
 
 
 void
-on_gestion_capteur_show                (GtkWidget       *objet,
+on_button1_ajouter_clicked             (GtkWidget       *objet,
                                         gpointer         user_data)
 {
-GtkWidget *Ajouter ;
-GtkWidget *gestion_capteur ;
-
-
-
-
+GtkWidget *ajouter;
+ajouter = create_ajouter (); 
+gtk_widget_show (ajouter);
 }
-
-//--------------------------------------------------
-
-void
-on_buttonannuler_clicked               (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-GtkWidget *Ajouter , *wbatreeviewcapteur ;
-GtkWidget *gestion_capteur ;
-Ajouter=lookup_widget(objet_graphique,"Ajouter");
-
-gtk_widget_destroy(Ajouter) ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gestion_capteur=create_gestion_capteur();
-
-gtk_widget_show(gestion_capteur);
-wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-affiche_capt(wbatreeviewcapteur);
-}
-//--------------------------------------------------------------------
-
-void
-on_buttonajouhisto_clicked             (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-GtkWidget *ajouthisto ;
-GtkWidget *gestion_capteur ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-
-gtk_widget_destroy(gestion_capteur) ;
-ajouthisto=lookup_widget(objet_graphique,"ajouthisto");
-ajouthisto=create_ajouthisto();
-
-gtk_widget_show(ajouthisto);
-}
-//---------------------------------------------------------------------------
-
-void
-on_buttonaffhisto_clicked              (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-GtkWidget *affichehisto ;
-GtkWidget *gestion_capteur ;
-GtkWidget *treeviewhisto ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-
-gtk_widget_destroy(gestion_capteur) ;
-affichehisto=lookup_widget(objet_graphique,"affichehisto");
-affichehisto=create_affichehisto();
-gtk_widget_show(affichehisto);
-treeviewhisto=lookup_widget(affichehisto,"treeviewhisto");
-afficherhisto(treeviewhisto);
-
-
-}
-//---------------------------------------------------------------------------
-
-void
-on_buttoncomfirmerhisto_clicked        (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-histo histo ;
-GtkWidget *input1,*input2,*input3 ;
-GtkWidget *ajouthisto , *output ;
-ajouthisto=lookup_widget(objet_graphique,"ajouthisto");
-
-input1=lookup_widget(objet_graphique,"entryhistonum");
-input2=lookup_widget(objet_graphique,"entryhistodate");
-input3=lookup_widget(objet_graphique,"spinbuttonval");
-
-
-
-strcpy(histo.id,gtk_entry_get_text(GTK_ENTRY(input1)));
-strcpy(histo.date,gtk_entry_get_text(GTK_ENTRY(input2)));
-histo.vall=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input3));
-
-ajoutehisto(histo);
-output=lookup_widget(objet_graphique,"label106");
-gtk_label_set_text(GTK_LABEL(output),"ajouté avec succés");
-}
-
-//---------------------------------------------------------------------
-void
-on_buttonannuler2_clicked              (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-GtkWidget *ajouthisto , *wbatreeviewcapteur ;
-GtkWidget *gestion_capteur ;
-ajouthisto=lookup_widget(objet_graphique,"ajouthisto");
-
-gtk_widget_destroy(ajouthisto) ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gestion_capteur=create_gestion_capteur();
-
-gtk_widget_show(gestion_capteur);
-wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-affiche_capt(wbatreeviewcapteur);
-}
-
-//------------------------------------------------------------------------------
-void
-on_treeviewhisto_row_activated         (GtkTreeView     *treeview,
-                                        GtkTreePath     *path,
-                                        GtkTreeViewColumn *column,
-                                        gpointer         user_data)
-{
-GtkTreeIter iter ;
-gchar* entryhistonum ;
-gchar* entryhistodate ;
-gchar* entryhistoval;
-
-histo histo ;
-char fichier[]={"histo.txt"};
-
-
-GtkTreeModel *model = gtk_tree_view_get_model(treeview);
-
-if (gtk_tree_model_get_iter(model, &iter, path))
-{
-	gtk_tree_model_get (GTK_LIST_STORE (model), &iter , 0 , &entryhistonum ,  1 ,&entryhistodate, 2 , &entryhistoval, -1);
-	strcpy(histo.id,entryhistonum);
-	strcpy(histo.date,entryhistodate);
-	strcpy(histo.vall,entryhistoval);
-	
-	afficherhisto(treeview);
-}
-}
-
-
-//------------------------------------------------------------------
-
-void
-on_buttonannulerhist_clicked           (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-GtkWidget *affichehisto ,*wbatreeviewcapteur ;
-GtkWidget *gestion_capteur ;
-affichehisto=lookup_widget(objet_graphique,"affichehisto");
-
-gtk_widget_destroy(affichehisto) ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gestion_capteur=create_gestion_capteur();
-
-gtk_widget_show(gestion_capteur);
-wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-affiche_capt(wbatreeviewcapteur);
-}
-//------------------------------------------------------------------------------
-void
-on_buttonmodif_clicked                 (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-
-GtkWidget *numodif ; 
-GtkWidget *gestion_capteur , *modifier ;
-
-
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-
-gtk_widget_destroy(gestion_capteur) ;
-modifier=lookup_widget(objet_graphique,"modifier");
-modifier=create_modifier();
-
-gtk_widget_show(modifier);
-
-}
-
-
-
-//--------------------------------------------------------------------------------
-
 
 
 void
-on_buttonannuler1_clicked              (GtkButton       *objet_graphique,
+on_button2_modifier_clicked            (GtkWidget       *objet,
                                         gpointer         user_data)
 {
-GtkWidget *modifier, *wbatreeviewcapteur ;
-GtkWidget *gestion_capteur ;
-modifier=lookup_widget(objet_graphique,"modifier");
+GtkWidget *menuprincipale;
+ GtkWidget *modifier1;
+menuprincipale=lookup_widget(objet,"menuprincipale");
 
-gtk_widget_destroy(modifier) ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gestion_capteur=create_gestion_capteur();
-gtk_widget_show(gestion_capteur);
-wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-affiche_capt(wbatreeviewcapteur);
-}
-
-//--------------------------------------------------------------------------
-
-
-void
-on_affiche_clicked                     (GtkButton       *objet,
-                                        gpointer         user_data)
-{
-GtkWidget *ajouthisto ;
-GtkWidget *affichehisto ;
-GtkWidget *treeviewhisto ;
-ajouthisto=lookup_widget(objet,"ajouthisto");
-
-gtk_widget_destroy(ajouthisto) ;
-affichehisto=lookup_widget(objet,"affichehisto");
-affichehisto=create_affichehisto();
-
-gtk_widget_show(affichehisto);
-treeviewhisto=lookup_widget(affichehisto,"treeviewhisto");
-afficherhisto(treeviewhisto);
-}
-//-----------------------------------------------------------------------------------
-
-void
-on_buttonsupp_clicked                  (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-GtkWidget *gestion_capteur ;
-GtkWidget *supprimer ;
-
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gtk_widget_destroy(gestion_capteur) ;
-supprimer=lookup_widget(objet_graphique,"supprimer");
-supprimer=create_supprimer();
-
-gtk_widget_show(supprimer);
-}
-//------------------------------------------------------------------------
-
-
-
-
-void
-on_buttoncomfsupp_clicked              (GtkButton       *objet,
-                                        gpointer         user_data)
-{
-capteur capteur ; 
-char Numero[50];
-
-GtkWidget *gestion_capteur , *supprimer ,*input1 ;
-GtkWidget *wbatreeviewcapteur ,*output ;
-
-input1=lookup_widget(objet,"numsupp");
-strcpy(capteur.nbre,gtk_entry_get_text(GTK_ENTRY(input1)));
-
-
-supp_capt(capteur);
-//gtk_widget_destroy(supprimer) ;
-/*gestion_capteur=lookup_widget(objet,"gestion_capteur");
-gestion_capteur=create_gestion_capteur();
-
-gtk_widget_show(gestion_capteur);
-
-wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-affiche_capt(wbatreeviewcapteur);*/
-output=lookup_widget(objet,"label101");
-gtk_label_set_text(GTK_LABEL(output),"supprimé avec succés");
+gtk_widget_destroy(menuprincipale);
+modifier1=lookup_widget(objet,"modifier1");
+modifier1=create_modifier1();
+gtk_widget_show(modifier1);
 
 }
 
 
 void
-on_buttonretour_clicked                (GtkButton       *objet_graphique,
+on_button3_ajouter_clicked             (GtkWidget       *objet_graphique,
                                         gpointer         user_data)
 {
-GtkWidget *gestion_capteur ;
-GtkWidget *supprimer ;
-GtkWidget *wbatreeviewcapteur ;
-supprimer=lookup_widget(objet_graphique,"supprimer");
-gtk_widget_destroy(supprimer) ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gestion_capteur=create_gestion_capteur();
+GtkWidget *input1,*input2,*input3;
+ GtkWidget *T, *E;
+ GtkWidget *JOUR;
+ GtkWidget *MOIS;
+ GtkWidget *ANNEE;
+ plantation p;
+ GtkWidget *ajouter;
+ FILE *f=NULL;
+ 
+ajouter=lookup_widget(objet_graphique,"ajouter");
+input1=lookup_widget(objet_graphique,"entry_nom");
+input2=lookup_widget(objet_graphique,"entry_code");
+JOUR=lookup_widget(objet_graphique,"jour");
+MOIS=lookup_widget(objet_graphique,"mois");
+ANNEE=lookup_widget(objet_graphique,"annee");
+E=lookup_widget(objet_graphique,"combobox_etat");
+input3=lookup_widget(objet_graphique,"entry_stock");
+T=lookup_widget(objet_graphique,"combobox_type");
+strcpy(p.nom,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(p.code_plante,gtk_entry_get_text(GTK_ENTRY(input2)));
+p.d.jour=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(JOUR));
+p.d.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(MOIS));
+p.d.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(ANNEE));
+strcpy(p.etat,gtk_combo_box_get_active_text(GTK_COMBO_BOX(E)));
+strcpy(p.stock,gtk_entry_get_text(GTK_ENTRY(input3)));
+strcpy(p.type,gtk_combo_box_get_active_text(GTK_COMBO_BOX(T)));
 
-gtk_widget_show(gestion_capteur);
-wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-affiche_capt(wbatreeviewcapteur);
+ajouter_plantation(p);
 }
 
 
 void
-on_refresh_clicked                     (GtkButton       *objet_graphique,
+on_button4_afficher_clicked            (GtkWidget       *objet,
                                         gpointer         user_data)
 {
-GtkWidget *gestion_capteur ;
-GtkWidget *wbatreeviewcapteur ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gtk_widget_destroy(gestion_capteur) ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gestion_capteur=create_gestion_capteur();
+GtkWidget *ajouter;
+GtkWidget *modifier;
+GtkWidget *modifier1;
+GtkWidget *menuprincipale;
+GtkWidget *treeview;
 
-gtk_widget_show(gestion_capteur);
-wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-affiche_capt(wbatreeviewcapteur);
-}
-
-
-/*void
-on_OK_clicked                          (GtkButton       *objet,
-                                        gpointer         user_data)
-{
-GtkWidget *input1 ;
-GtkWidget *numodif ;
-GtkWidget *modifier ;
-capteur capteur ;
-
-
-
-input1=lookup_widget(objet,"entrynumodif");
-strcpy(capteur.nbre,gtk_entry_get_text(GTK_ENTRY(input1)));
-
-gtk_widget_destroy(numodif) ;
+ajouter=lookup_widget(objet,"ajouter");
+gtk_widget_destroy(ajouter);
 modifier=lookup_widget(objet,"modifier");
-modifier=create_modifier();
+gtk_widget_destroy(modifier);
+modifier1=lookup_widget(objet,"modifier1");
+gtk_widget_destroy(modifier1);
+menuprincipale=lookup_widget(objet,"menuprincipale");
+menuprincipale=create_menuprincipale();
+gtk_widget_show (menuprincipale);
+treeview=lookup_widget(menuprincipale,"treeview");
+afficher_plantation(treeview);
+}
 
+
+void
+on_button5_modifier_clicked            (GtkButton       *objet_graphique,
+                                        gpointer         user_data)
+{
+char CODE_PLANTE[20];
+int test;
+plantation p;
+plantation m;
+GtkWidget *input1,*input2,*input3,*entry22_code;
+GtkWidget *S;
+GtkWidget *T1, *E1;
+GtkWidget *JOUR;
+GtkWidget *MOIS;
+GtkWidget *ANNEE;
+GtkWidget *modifier1,*modifier;
+GtkWidget *output;
+char fichier[]={"plantation.txt"};
+modifier=lookup_widget(objet_graphique,"modifier");
+input1=lookup_widget(objet_graphique,"entry1_nom");
+input2=lookup_widget(objet_graphique,"entry1_code");
+JOUR=lookup_widget(objet_graphique,"jour1");
+MOIS=lookup_widget(objet_graphique,"mois1");
+ANNEE=lookup_widget(objet_graphique,"annee1");
+E1=lookup_widget(objet_graphique,"combobox1_etat");
+input3=lookup_widget(objet_graphique,"entry1_stock");
+T1=lookup_widget(objet_graphique,"combobox1_type");
+/*if (verifier_cin(CODE_PLANTE)!=0)
+gtk_label_set_text(GTK_LABEL(output),"agent n'existe pas");*/
+/*else
+{*/ 
+		// gtk_widget_show(window6);
+
+
+strcpy(p.nom,gtk_entry_get_text(GTK_ENTRY(input1)));
+strcpy(p.code_plante,gtk_entry_get_text(GTK_ENTRY(input2)));
+p.d.jour=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(JOUR));
+p.d.mois=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(MOIS));
+p.d.annee=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(ANNEE));
+strcpy(p.etat,gtk_combo_box_get_active_text(GTK_COMBO_BOX(E1)));
+strcpy(p.stock,gtk_entry_get_text(GTK_ENTRY(input3)));
+strcpy(p.type,gtk_combo_box_get_active_text(GTK_COMBO_BOX(T1)));
+modifier_plantation(p);
+
+}
+
+
+
+void
+on_button6_afficher_clicked            (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *ajouter;
+GtkWidget *modifier;
+GtkWidget *modifier1;
+GtkWidget *menuprincipale;
+GtkWidget *treeview;
+
+ajouter=lookup_widget(objet,"ajouter");
+gtk_widget_destroy(ajouter);
+modifier=lookup_widget(objet,"modifier");
+gtk_widget_destroy(modifier);
+modifier1=lookup_widget(objet,"modifier1");
+gtk_widget_destroy(modifier1);
+menuprincipale=lookup_widget(objet,"menuprincipale");
+menuprincipale=create_menuprincipale();
+gtk_widget_show (menuprincipale);
+treeview=lookup_widget(menuprincipale,"treeview");
+afficher_plantation(treeview);
+}
+
+
+void
+on_button500_modifier_clicked          (GtkButton       *objet_graphique,
+                                        gpointer         user_data)
+{
+GtkWidget *input2;
+ plantation p;
+ GtkWidget *modifier1;
+ GtkWidget *modifier;
+input2=lookup_widget(objet_graphique,"entry22_code");
+strcpy(p.code_plante,gtk_entry_get_text(GTK_ENTRY(input2)));
+modifier1=lookup_widget(objet_graphique,"modifier1");
+gtk_widget_destroy(modifier1);
+modifier=lookup_widget(objet_graphique,"modifier");
+modifier=create_modifier();
 gtk_widget_show(modifier);
 
+}
+
+	
+/*GtkWidget *windowb3;
+		GtkWidget *windowb6;
+		windowb3=lookup_widget(objet_graphique,"windowb3");	
+		windowb6 = create_windowb6();
+		gtk_widget_destroy(windowb3);
+		gtk_widget_show(windowb6);*/
 
 
+/*GtkWidget *input;
+GtkWidget *output;
+GtkWidget *windowb2, *windowb4;
+agent g;
+char refer[20];
+input=lookup_widget(objet_graphique,"entryb9");
+output=lookup_widget(objet_graphique,"label1");
+strcpy(refer,gtk_entry_get_text(GTK_ENTRY(input)));
+if(strcmp(refer,g.cin)==0)
+gtk_label_set_text(GTK_LABEL(output),"client n'existe pas");
+else
+{
+modifier_agent(refer);
+gtk_label_set_text(GTK_LABEL(output),"suppression avec succée");
+windowb4=lookup_widget(objet_graphique,"windowb6");
+
+windowb2=lookup_widget(objet_graphique,"windowb3");
+gtk_widget_hide(windowb2);
+windowb4 = create_windowb4();
+gtk_widget_show (windowb4);
 }*/
 
+
+/////////////
+
+
+
+
+
+
 void
-on_buttoncomfirmer1_clicked            (GtkButton       *objet_graphique,
+on_button1_supprimer_clicked           (GtkWidget       *objet,
                                         gpointer         user_data)
 {
-capteur capteur ;
-GtkWidget *input1,*input2,*input3,*input4,*input5,*input6,*input7;
-GtkWidget *modifier ,*c ,*c1;
-GtkWidget *gestion_capteur, *numodif ;
-GtkWidget  *wbatreeviewcapteur , *output ;	
-char fichier[]={"capteur.txt"};
-
-
-
-
-modifier=lookup_widget(objet_graphique,"modifier");
-
-input1=lookup_widget(objet_graphique,"entrynum1");
-input2=lookup_widget(objet_graphique,"entrynserie1");
-input3=lookup_widget(objet_graphique,"entrymarque1");
-c=lookup_widget(objet_graphique,"comboboxtype1");
-input5=lookup_widget(objet_graphique,"spinbuttonbi1");
-input6=lookup_widget(objet_graphique,"spinbuttonbs1");
-c1=lookup_widget(objet_graphique,"comboboxetat1");
-
-
-
-strcpy(capteur.nbre,gtk_entry_get_text(GTK_ENTRY(input1)));
-strcpy(capteur.nserie,gtk_entry_get_text(GTK_ENTRY(input2)));
-strcpy(capteur.marque,gtk_entry_get_text(GTK_ENTRY(input3)));
-strcpy(capteur.type,gtk_combo_box_get_active_text(GTK_COMBO_BOX(c)));
-capteur.bi=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input5));
-capteur.bs=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(input6));
-strcpy(capteur.etat,gtk_combo_box_get_active_text(GTK_COMBO_BOX(c1)));
-
-
-
-modifier_capt(capteur);
-
-/*gtk_widget_destroy(modifier) ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-gestion_capteur=create_gestion_capteur();
-
-gtk_widget_show(gestion_capteur);
-
-wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-affiche_capt(wbatreeviewcapteur);*/
-output=lookup_widget(objet_graphique,"label103");
-gtk_label_set_text(GTK_LABEL(output),"modifié avec succés");
-
+GtkWidget *supprimer;
+supprimer = create_supprimer (); 
+gtk_widget_show (supprimer);
 }
 
 
+void
+on_button_supprimer_clicked            (GtkButton       *objet_graphique,
+                                        gpointer         user_data)
+{
+plantation p;
+GtkWidget  *input2;
 
 
 
+input2=lookup_widget(objet_graphique,"entry22_code");
 
+strcpy(p.code_plante,gtk_entry_get_text(GTK_ENTRY(input2)));
 
-
-
-
+supprimer_plantation(p);
+}
 
 
 void
-on_Aff_clicked                         (GtkButton       *objet_graphique,
+on_button333_afficher_clicked          (GtkWidget       *objet,
                                         gpointer         user_data)
 {
-
-char NUMERO[20];
-int test;
-char f[]={"capteur.txt"};
-capteur capteur ;
-GtkWidget *entrymarque1, *entrynserie1 , *entrynum1 ,*c ,*c1 ,*input1 ,*input2 ,*input3  ;
+GtkWidget *ajouter;
 GtkWidget *modifier;
-GtkWidget *output;
-modifier=lookup_widget(objet_graphique,"modifier");
-input1=lookup_widget(objet_graphique,"entrynum1");
-input2=lookup_widget(objet_graphique,"entrynserie1");
-input3=lookup_widget(objet_graphique,"entrymarque1");
-//lookup_widget(objet_graphique,"comboboxtype1")=c;
-//input5=lookup_widget(objet_graphique,"spinbuttonbi1");
-//input6=lookup_widget(objet_graphique,"spinbuttonbs1");
-//lookup_widget(objet_graphique,"comboboxetat1")=c1;
-//output= lookup_widget(objet_graphique,"label1");
-strcpy(NUMERO,gtk_entry_get_text(GTK_ENTRY(entrynum1)));
-if (verifier_num(NUMERO)==0)
-//gtk_label_set_text(GTK_LABEL(output),"equipement n'existe pas");
-//else
-//{
+GtkWidget *modifier1;
+GtkWidget *supprimer;
+GtkWidget *menuprincipale;
+GtkWidget *treeview;
 
+ajouter=lookup_widget(objet,"ajouter");
+gtk_widget_destroy(ajouter);
+modifier=lookup_widget(objet,"modifier");
+gtk_widget_destroy(modifier);
+modifier1=lookup_widget(objet,"modifier1");
+gtk_widget_destroy(modifier1);
+supprimer=lookup_widget(objet,"supprimer");
+gtk_widget_destroy(supprimer);
+menuprincipale=lookup_widget(objet,"menuprincipale");
+menuprincipale=create_menuprincipale();
+gtk_widget_show (menuprincipale);
+treeview=lookup_widget(menuprincipale,"treeview");
+afficher_plantation(treeview);
+}
+
+
+void
+on_button_chercher_clicked             (GtkWidget       *objet_graphique,
+                                        gpointer         user_data)
 {
+plantation p ;
+GtkWidget *menuprincipale , *treeview ,*input1 ;
+menuprincipale=lookup_widget(objet_graphique,"menupricipale");
+
+char fichier[]={"recherche.txt"};
+char fichier1[]={"plantation.txt"};
+
+
+
+
+
+menuprincipale=lookup_widget(objet_graphique,"menuprincipale");
+input1=lookup_widget(objet_graphique,"entry1_rech");
+strcpy(p.type,gtk_entry_get_text(GTK_ENTRY(input1)));
+
+rech_p(p) ;
+gtk_widget_destroy(menuprincipale) ;
+menuprincipale=lookup_widget(objet_graphique,"menuprincipale");
+menuprincipale=create_menuprincipale();
+gtk_widget_show(menuprincipale);
+treeview=lookup_widget(menuprincipale,"treeview");
+afficher_rech(treeview);
+}
+
+
+
+void
+on_button1_retour_clicked              (GtkWidget       *objet,
+
+                                        gpointer         user_data)
+{
+GtkWidget *menuprincipal ;
+menuprincipal=create_menuprincipale();
+gtk_widget_show (menuprincipal);
+
+}
+
+
+void
+on_button2_retour_clicked              (GtkWidget       *objet,
+
+                                        gpointer         user_data)
+{
+GtkWidget *modifier1 ;
+modifier1=create_modifier1();
+gtk_widget_show (modifier1);
+
+}
+
+
+void
+on_button3_retour_clicked              (GtkWidget       *objet,
+
+                                        gpointer         user_data)
+{
+GtkWidget *ajouter ;
+ajouter=create_ajouter();
+gtk_widget_show (ajouter);
+
+}
+
+
+void
+on_button4_retour_clicked              (GtkWidget       *objet,
+
+                                        gpointer         user_data)
+{
+GtkWidget *modifier ;
+modifier=create_modifier();
+gtk_widget_show (modifier);
+}
+
+
+void
+on_button_refresh_clicked              (GtkButton       *objet_graphique,
+                                        gpointer         user_data)
+{
+GtkWidget *menuprincipale ;
+GtkWidget *treeview ;
+menuprincipale=lookup_widget(objet_graphique,"menuprincipale");
+gtk_widget_destroy(menuprincipale) ;
+menuprincipale=lookup_widget(objet_graphique,"menuprincipale");
+menuprincipale=create_menuprincipale();
+gtk_widget_show (menuprincipale);
+treeview=lookup_widget(menuprincipale,"treeview");
+afficher_plantation(treeview);
+
+
+}
+
+
+void
+on_afficher_precipitation_clicked      (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *windowaffich ;
+GtkWidget *fenetre_ajout;
+GtkWidget *treeview1;
+
+fenetre_ajout=lookup_widget(objet,"ajout_precipitation");
+gtk_widget_destroy(fenetre_ajout);
+windowaffich=lookup_widget(objet,"affichage_precipitation");
+
+GtkWidget *windowpr1,* windowpr2,* windowpr3,* windowpr4;
+windowpr1=lookup_widget(objet,"ajout_precipitation");
+gtk_widget_destroy(windowpr1);
+windowpr2=lookup_widget(objet,"modif_precipitation");
+gtk_widget_destroy(windowpr2);
+windowpr3=lookup_widget(objet,"supprimer_precipitatio");
+gtk_widget_destroy(windowpr3);
+windowpr4=lookup_widget(objet,"acceuil_precipitation");
+gtk_widget_destroy(windowpr4);
+
+windowaffich=create_affichage_precipitation();
+gtk_widget_show (windowaffich);
+
+treeview1=lookup_widget(windowaffich,"treeview1");
+afficher_precipitation(treeview1);
+}
+
+
+void
+on_supprimer_precipitation_clicked     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *supprim_precipitation ;
+
+GtkWidget *windowpr1,* windowpr2,* windowpr3,* windowpr4;
+windowpr1=lookup_widget(objet,"acceuil_precipitation");
+gtk_widget_destroy(windowpr1);
+windowpr2=lookup_widget(objet,"ajout_precipitation");
+gtk_widget_destroy(windowpr2);
+windowpr3=lookup_widget(objet,"modif_precipitation");
+gtk_widget_destroy(windowpr3);
+windowpr4=lookup_widget(objet,"affichage_precipitation");
+gtk_widget_destroy(windowpr4);
+
+
+supprim_precipitation=create_supprimer_precipitatio();
+gtk_widget_show (supprim_precipitation);
+}
+
+
+void
+on_modifier_precipitation_clicked      (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *modif_prcipitation ;
+
+GtkWidget *windowpr1,* windowpr2,* windowpr3,* windowpr4;
+windowpr1=lookup_widget(objet,"acceuil_precipitation");
+gtk_widget_destroy(windowpr1);
+windowpr2=lookup_widget(objet,"ajout_precipitation");
+gtk_widget_destroy(windowpr2);
+windowpr3=lookup_widget(objet,"supprimer_precipitatio");
+gtk_widget_destroy(windowpr3);
+windowpr4=lookup_widget(objet,"affichage_precipitation");
+gtk_widget_destroy(windowpr4);
+
+modif_prcipitation=create_modif_precipitation();
+gtk_widget_show (modif_prcipitation);
+}
+
+
+void
+on_ajouter_precipitation_clicked       (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *ajout_precipitation ;
+
+GtkWidget *windowpr1,* windowpr2,* windowpr3,* windowpr4;
+windowpr1=lookup_widget(objet,"acceuil_precipitation");
+gtk_widget_destroy(windowpr1);
+windowpr2=lookup_widget(objet,"modif_precipitation");
+gtk_widget_destroy(windowpr2);
+windowpr3=lookup_widget(objet,"supprimer_precipitatio");
+gtk_widget_destroy(windowpr3);
+windowpr4=lookup_widget(objet,"affichage_precipitation");
+gtk_widget_destroy(windowpr4);
+
+ajout_precipitation=create_ajout_precipitation();
+gtk_widget_show (ajout_precipitation);
+}
+
+
+void
+on_valider_precipitation_clicked       (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+FILE* f;precipitation PT; char ch[50];
+int j,m,a,mon; char chj[20],chm[20],cha[20],chs[20],text[20];
+int test1 , test2;
+   
+    GtkWidget *C,*QA,*M,*A,*pt;
+    GtkWidget *ajouter_precipitation1;
+    ajouter_precipitation1=lookup_widget(objet,"ajout_precipitation");
+    C=lookup_widget(objet,"entry_code_precipitation");
+    M=lookup_widget(objet,"spinbutton_mois");
+    A=lookup_widget(objet,"spinbutton_annee");
+    QA=lookup_widget(objet,"spinbutton_quantite");
+   
+
+    pt=lookup_widget (objet ,"sortie_validation");
+m=gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(M)); sprintf(chm,"%d",m);
+a=gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(A)); sprintf(cha,"%d",a);
+mon=gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON(QA)); sprintf(chs,"%d",mon);
+strcpy(PT.code_precipitation,gtk_entry_get_text(GTK_ENTRY(C)));
+
+strcpy(PT.mois,chm);
+strcpy(PT.annee,cha);
+strcpy(PT.quantite,chs);
+test1=P_trouve(PT.code_precipitation);
+test2=P_trouve_mois_annee(PT.mois,PT.annee);
+
+		
+
+    
+	    if (test1!=1&&test2!=1)
+		{ 
+		    ajouter_precipitation (PT);
+		    sprintf(ch,"Ajout reussi");
+		    gtk_label_set_text(GTK_LABEL(pt),ch);
+		}
+	    else
+		{
+		    sprintf(ch,"ERREUR: precipitation deja existant");
+		    gtk_label_set_text(GTK_LABEL(pt),ch);
+
+		}
+}
+
+
+void
+on_chercher_modif_clicked              (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget* identif,*pt; char id [25],ch[40]; int test;
+char ch1[20],ch2[20],ch3[20],ch4[20];
+GtkWidget *qa, *mm, *aa;
+FILE* f;
+f=fopen("precipitation.txt","r");
+identif=lookup_widget(objet,"entry2");
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(identif)));   
+qa=lookup_widget(objet,"sortie_quantite");
+mm=lookup_widget(objet,"sortie_mois_precipitation");
+aa=lookup_widget(objet,"sortie_annee_precipitation");
+pt=lookup_widget(objet,"sortie_recherche_precipitation");
+
+	if (f!=NULL)
+{
+
+         while (fscanf (f, "%s %s %s %s\n",ch1,ch2,ch3,ch4)!=EOF)
+            {
+	if (strcmp(id,ch1)==0)
+
+		{
+
+		   	 sprintf(ch,"Identifiant existant!");
+		   	 gtk_label_set_text(GTK_LABEL(pt),ch);
+
+			gtk_label_set_text(GTK_LABEL(qa),ch2);
+			gtk_label_set_text(GTK_LABEL(mm),ch3);
+			gtk_label_set_text(GTK_LABEL(aa),ch4);
+
+
+		}}
+	fclose(f);
+		}
+	    else
+		{
+		    sprintf(ch,"ERREUR: identifiant non existant.");
+		    gtk_label_set_text(GTK_LABEL(pt),ch);
+
+		} 
+
+}
+
+
+void
+on_valider_modif_precipitation_clicked (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+char ch_element[20],ch_value[20],id[20],ch[50]; int e,test;
+
+	GtkWidget *element,*val,*identif,*pt;
+
+pt=lookup_widget(objet,"sortie_resultat_precipitation");
+identif=lookup_widget(objet,"entry2");
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(identif)));   
+element=lookup_widget(objet,"combobox_modif");
+val=lookup_widget(objet,"entry_val");
+
+strcpy(ch_element,gtk_combo_box_get_active_text(GTK_COMBO_BOX(element)));
+
+e=int_ch(ch_element); 
+
+strcpy(ch_value,gtk_entry_get_text(GTK_ENTRY(val)));
+
+test=modif_precipitation(id,e,ch_value);
+
+sprintf(ch,"%d",test);//gtk_label_set_text(GTK_LABEL(pt),ch);
+
+    
+	    if (strcmp(ch,"1")==0)
+		{ 
+		 
+		    sprintf(ch,"Modification reussie!");
+		    gtk_label_set_text(GTK_LABEL(pt),ch);
+		}
+	    else
+		{
+			
+		    sprintf(ch,"ERREUR: identifiant inexistant");
+		    gtk_label_set_text(GTK_LABEL(pt),ch);
+
+		} 
+
+
+}
+
+
+void
+on_retour2_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *retour_acceuil ;
+
+GtkWidget *windowpr1,* windowpr2,* windowpr3,* windowpr4;
+windowpr1=lookup_widget(objet,"ajout_precipitation");
+gtk_widget_destroy(windowpr1);
+windowpr2=lookup_widget(objet,"modif_precipitation");
+gtk_widget_destroy(windowpr2);
+windowpr3=lookup_widget(objet,"supprimer_precipitatio");
+gtk_widget_destroy(windowpr3);
+windowpr4=lookup_widget(objet,"affichage_precipitation");
+gtk_widget_destroy(windowpr4);
+
+retour_acceuil=create_acceuil_precipitation();
+gtk_widget_show (retour_acceuil);
+}
+
+
+void
+on_retour3_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *retour_acceuil ;
+GtkWidget *windowpr1,* windowpr2,* windowpr3,* windowpr4;
+windowpr1=lookup_widget(objet,"ajout_precipitation");
+gtk_widget_destroy(windowpr1);
+windowpr2=lookup_widget(objet,"modif_precipitation");
+gtk_widget_destroy(windowpr2);
+windowpr3=lookup_widget(objet,"supprimer_precipitatio");
+gtk_widget_destroy(windowpr3);
+windowpr4=lookup_widget(objet,"affichage_precipitation");
+gtk_widget_destroy(windowpr4);
+retour_acceuil=create_acceuil_precipitation();
+gtk_widget_show (retour_acceuil);
+}
+
+
+void
+on_valider_suppression_clicked         (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget* code_precipitation,*window_supp;
+GtkWidget* pt;
+ char id[20], ch[50]; int test;
+window_supp=lookup_widget(objet,"supprimer_precipitatio");
+code_precipitation=lookup_widget(objet,"entry_code_supp");
+strcpy(id,gtk_entry_get_text(GTK_ENTRY(code_precipitation)));
+pt=lookup_widget (objet ,"sortie_code_supprimer");
+test=supprimer_precipitation(id);
+sprintf(ch,"%d",test);
+
+    
+	    if (strcmp(ch,"1")==0)
+		{ 
+		    
+		    sprintf(ch,"Supression reussie");
+		    gtk_label_set_text(GTK_LABEL(pt),ch);
+		}
+	    else
+		{
+		    sprintf(ch,"ERREUR: ID inexistant");
+		    gtk_label_set_text(GTK_LABEL(pt),ch);
+
+		} 
+
+}
+
+
+void
+on_retour4_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *retour_acceuil ;
+GtkWidget *windowpr1,* windowpr2,* windowpr3,* windowpr4;
+windowpr1=lookup_widget(objet,"ajout_precipitation");
+gtk_widget_destroy(windowpr1);
+windowpr2=lookup_widget(objet,"modif_precipitation");
+gtk_widget_destroy(windowpr2);
+windowpr3=lookup_widget(objet,"supprimer_precipitatio");
+gtk_widget_destroy(windowpr3);
+windowpr4=lookup_widget(objet,"affichage_precipitation");
+gtk_widget_destroy(windowpr4);
+retour_acceuil=create_acceuil_precipitation();
+gtk_widget_show (retour_acceuil);
+}
+
+
+void
+on_retour1_clicked                     (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+GtkWidget *retour_acceuil ;
+GtkWidget *windowpr1,* windowpr2,* windowpr3,* windowpr4;
+windowpr1=lookup_widget(objet,"ajout_precipitation");
+gtk_widget_destroy(windowpr1);
+windowpr2=lookup_widget(objet,"modif_precipitation");
+gtk_widget_destroy(windowpr2);
+windowpr3=lookup_widget(objet,"supprimer_precipitatio");
+gtk_widget_destroy(windowpr3);
+windowpr4=lookup_widget(objet,"affichage_precipitation");
+gtk_widget_destroy(windowpr4);
+retour_acceuil=create_acceuil_precipitation();
+gtk_widget_show (retour_acceuil);
+}
+
+
+void
+on_treeview1_row_activated             (GtkTreeView     *treeview,
+                                        GtkTreePath     *path,
+                                        GtkTreeViewColumn *column,
+                                        gpointer         user_data)
+{
+GtkTreeIter iter;
+gchar* code_precipitation;
+gchar* mm;
+gchar* aa;
+gchar* qq;
+precipitation PT;
+GtkTreeModel *model= gtk_tree_view_get_model(treeview);
+
+if (gtk_tree_model_get_iter(model, &iter,path))
+{
+//obtenir les valeurs de la ligne selectionnée
+
+gtk_tree_model_get(GTK_LIST_STORE(model),&iter,1,&code_precipitation,2,&qq,3,&mm,4,&aa,-1);
+
+}
+}
+
+
+void
+on_chercher_annee_seche_clicked        (GtkWidget       *objet,
+                                        gpointer         user_data)
+{
+
+FILE* f; char ch[50],chq[20];
+char ch1[20],ch2[20],ch3[20],ch4[20],as[20];
+int q,qt;
+    	GtkWidget *pt;
+	GtkWidget *affichage;
+	affichage=lookup_widget(objet,"affichage_precipitation");
+   	pt=lookup_widget (objet ,"sortie_annee_seche");
+	q=0;
+f=fopen("precipitation.txt","r");
 if (f!=NULL)
-{while (fscanf(f,"%s %s %s %s %s %d %d\n",capteur.nbre,capteur.nserie,capteur.marque,capteur.type,capteur.etat,capteur.bi,capteur.bs)!=EOF)
-{if (strcmp(capteur.nbre,NUMERO)==0) 
-{/* gtk_widget_show(modifier);
-gtk_entry_set_text(GTK_ENTRY(entrynserie1),capteur.nserie) ;
-	gtk_entry_set_text(GTK_ENTRY(entrymarque1),capteur.marque) ;
-	//gtk_combo_box_get_active_text(GTK_COMBO_BOX(comboboxtype1),capteur.type) ;
-  // gtk_combo_box_get_active_text(GTK_COMBO_BOX(comboboxetat1),capteur.etat) ;
-//gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(spinbuttonbi1),capteur.bi) ;
-  //   gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(spinbuttonbs1),capteur.bs) ;
-*/
-}}
-//}
+{
+         while (fscanf (f, "%s %s %s %s \n",ch1,ch2,ch3,ch4)!=EOF)
+           		 {
+				
+				qt=calcul_quantite(ch4);
+				if (qt<=q) 
+				{
+				q=qt;
+				strcpy(as,ch4);}
+				else q=qt;
+			 }
+}
 fclose(f);
-}}	
-gtk_widget_destroy(modifier) ;
-	modifier=lookup_widget(objet_graphique,"modifier");
-	modifier=create_modifier();
-	gtk_widget_show(modifier);
+strcpy(chq,as);
 
-}	// gtk_widget_show(window6);
+gtk_label_set_text(GTK_LABEL(pt),chq);
 
+}
 
 
 
 void
-on_buttonchercher_clicked              (GtkButton       *objet_graphique,
+on_button_anneeseche_clicked           (GtkWidget       *objet,
                                         gpointer         user_data)
 {
-capteur capteur ;
-GtkWidget *gestion_capteur , *wbatreeviewcapteur ,*input1 ;
-gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-
-char fichier[]={"rechcapteur.txt"};
-char fichier1[]={"capteur.txt"};
-
-
-
-
-
-	gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-	input1=lookup_widget(objet_graphique,"entryrech");
-	strcpy(capteur.type,gtk_entry_get_text(GTK_ENTRY(input1)));
-
-	rech_capt(capteur) ;
-	gtk_widget_destroy(gestion_capteur) ;
-	gestion_capteur=lookup_widget(objet_graphique,"gestion_capteur");
-	gestion_capteur=create_gestion_capteur();
-	gtk_widget_show(gestion_capteur);
-	wbatreeviewcapteur=lookup_widget(gestion_capteur,"wbatreeviewcapteur");
-	affiche_rech(wbatreeviewcapteur);
+GtkWidget *acceuil_precipitation;
+GtkWidget *menuprincipale;
+menuprincipale= create_menuprincipale (); 
+gtk_widget_destroy(menuprincipale);
+acceuil_precipitation = create_acceuil_precipitation(); 
+gtk_widget_show (acceuil_precipitation);
 }
 
 
 
 
 
-
-
-void
-on_buttoncherchisto_clicked            (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-
-histo histo ;
-GtkWidget *ajouthisto ;
-GtkWidget *affichehisto ;
-GtkWidget *treeviewhisto , *input1 ;
-affichehisto=lookup_widget(objet_graphique,"affichehisto");
-
-char fichier[]={"rechhisto.txt"};
-char fichier1[]={"histo.txt"};
-
-
-
-
-
-	affichehisto=lookup_widget(objet_graphique,"affichehisto");
-	input1=lookup_widget(objet_graphique,"entryrech1");
-	strcpy(histo.id,gtk_entry_get_text(GTK_ENTRY(input1)));
-
-	rech_histo(histo) ;
-	gtk_widget_destroy(affichehisto) ;
-	affichehisto=lookup_widget(objet_graphique,"affichehisto");
-	affichehisto=create_affichehisto();
-	gtk_widget_show(affichehisto);
-	treeviewhisto=lookup_widget(affichehisto,"treeviewhisto");
-	afficherrech(treeviewhisto);
-}
-
-
-void
-on_buttonala_clicked                   (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-
-histo histo ;
-GtkWidget *ajouthisto ;
-GtkWidget *affichehisto ;
-GtkWidget *treeviewhisto , *input1 ;
-affichehisto=lookup_widget(objet_graphique,"affichehisto");
-
-char fichier[]={"ala.txt"};
-char fichier1[]={"histo.txt"};
-
-
-
-
-
-	affichehisto=lookup_widget(objet_graphique,"affichehisto");
-	rech_ala(histo) ;
-	gtk_widget_destroy(affichehisto) ;
-	affichehisto=lookup_widget(objet_graphique,"affichehisto");
-	affichehisto=create_affichehisto();
-	gtk_widget_show(affichehisto);
-	treeviewhisto=lookup_widget(affichehisto,"treeviewhisto");
-	afficherala(treeviewhisto);
-
-}
-
-
-void
-on_ref_clicked                         (GtkButton       *objet_graphique,
-                                        gpointer         user_data)
-{
-GtkWidget *affichehisto ;
-GtkWidget *treeviewhisto ;
-affichehisto=lookup_widget(objet_graphique,"affichehisto");
-gtk_widget_destroy(affichehisto) ;
-affichehisto=lookup_widget(objet_graphique,"affichehisto");
-affichehisto=create_affichehisto();
-
-gtk_widget_show(affichehisto);
-treeviewhisto=lookup_widget(affichehisto,"treeviewhisto");
-afficherhisto(treeviewhisto);
-}
 
